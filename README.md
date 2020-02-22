@@ -60,6 +60,8 @@ $ node server.js
 
 This will ensure that the example demonstrating how to call an API works. Also, the second example showing SSO requires this.
 
+Once the static HTML is served, by hook or by crook, download it into a browser and try it out. 
+
 ## More Information
 
 More information about the assisted token flow and other related samples can be found at these locations:
@@ -72,4 +74,4 @@ More information about the assisted token flow and other related samples can be 
 
 ## Licensing
 
-This software is copyright (C) 2020 Curity AB. It is open source software that is licensed under the [Apache 2](LICENSE).
+This software is copyright (C) 2020 Curity AB. It is open source software that is licensed under the [Apache 2 license](LICENSE).
