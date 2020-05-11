@@ -1,5 +1,8 @@
 # JavaScript Assisted Token Example
 
+[![Quality](https://curity.io/assets/images/badges/javascript-assisted-token-website-quality.svg)](https://curity.io/resources/code-examples/status/)
+[![Availability](https://curity.io/assets/images/badges/javascript-assisted-token-website-availability.svg)](https://curity.io/resources/code-examples/status/)
+
 This example shows how the assisted token flow can be used with a JavaScript client. One part of the example uses JQuery to call an API, but that library is only needed for that part, and isn't a requirement of the assisted token flow or the client library.
 
 > *NOTE*: A very similar version of this example used to ship with the Curity Identity Server.
