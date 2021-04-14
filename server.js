@@ -41,7 +41,13 @@ var handleFileRequest = function(request, response, pathname) {
                     response.end();
                 }
                 else {
-                    response.writeHead(200, {'Content-Type': contentType});
+                    var responseHeaders = {
+                        'Content-Type': contentType,
+                        'Content-Security-Policy': "frame-src 'self' https://idsvr.example.com",
+                    }
+                    console.log(`File ${filePath} being served`)
+                    
+                    response.writeHead(200, responseHeaders);
                     response.end(content, 'utf-8');
                 }
             });
