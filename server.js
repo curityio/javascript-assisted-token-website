@@ -43,7 +43,6 @@ var handleFileRequest = function(request, response, pathname) {
                 else {
                     var responseHeaders = {
                         'Content-Type': contentType,
-                        'Content-Security-Policy': "frame-src 'self' https://idsvr.example.com",
                     }
                     console.log(`File ${filePath} being served`)
                     
