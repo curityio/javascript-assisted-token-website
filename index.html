@@ -5,10 +5,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    
     <!-- uncomment the following script tag to enable preflighting; see Assisted Token docs for more information -->
-    <!-- _preflight
     <script type="text/javascript" data-autoload="true" src="https://localhost:8443/authn/anonymous/resources/js/preflight.min.js"></script>
-    -->
 </head>
 <body>
 <div class="container" id="header">
@@ -18,9 +17,9 @@
 <div class="container">
 
     <h2>Example 1</h2>
-    <h3>This example shows how to fallback to Pop Over when the user isn't authenticated</h3>
+    <h3>This example shows how to get a token and sign the user in if required</h3>
     <p>Start by logging out to be sure no authentication session is present.</p>
-    <p>The example uses the 'fetchTokensOrLogin' method, which will first try to get the tokens but if
+    <p>The example uses the 'loginIfRequired' method, which will first try to get the tokens but if
     it can't find a SSO session it will popout a login form.</p>
     <p><small>Scroll down to example 5 to logout if necessary.</small></p>
     <button id="getTokensWithPopup" class="btn btn-default" name="getTokensWithPopup">Get Tokens</button>
@@ -29,32 +28,32 @@
     <hr/>
 
     <h2>Example 2</h2>
-    <h3>Follow these steps to retrieve token when already authenticated</h3>
+    <h3>Make a RESTful API call with an OAuth access token</h3>
+    <button id="getResource" class="btn btn-default" name="getResource">Get Resource</button>
+    <hr/>
+    <div id="result_2"></div>
+    <hr/>
+
+    <h2>Example 3</h2>
+    <h3>Follow these steps to retrieve a new token when already authenticated</h3>
     <ol>
         <li>Run example 1 or login some how to obtain an SSO session.</li>
         <li>Click the retrieve tokens button</li>
     </ol>
     <button id="getTokens" class="btn btn-default" name="getTokens">Get Tokens</button>
     <hr/>
-    <div id="result_2"></div>
-    <hr/>
-
-    <h2>Example 3</h2>
-    <h3>Forced authentication; ignoring any existing SSO session.</h3>
-    <button id="login" class="btn btn-default" name="getTokens">Get Tokens</button>
-    <hr/>
     <div id="result_3"></div>
     <hr/>
 
     <h2>Example 4</h2>
-    <h3>Make a RESTful API call using jQuery.</h3>
-    <button id="getResource" class="btn btn-default" name="getResource">Get Resource</button>
+    <h3>Force the user to re-authenticate, ignoring any existing SSO session.</h3>
+    <button id="login" class="btn btn-default" name="getTokens">Get Tokens</button>
     <hr/>
     <div id="result_4"></div>
     <hr/>
 
     <h2>Example 5</h2>
-    <h3>Revoke issued tokens and logout the user session.</h3>
+    <h3>Revoke issued tokens and sign the user out to end the user session</h3>
     <button id="logout" class="btn btn-default" name="logout">Logout</button>
     <hr/>
     <div id="result_5"></div>
@@ -62,7 +61,7 @@
 
 </div>
 
-<script id="jquery-link" src="https://localhost:8443/assets/js/lib/jquery-3.4.1.min.js" type="text/javascript"></script>
+<script id="jquery-link" src="https://code.jquery.com/jquery-3.4.1.min.js" type="text/javascript"></script>
 <script id="assisted-token-js-script" type="text/javascript"
         src="https://localhost:8443/oauth/v2/oauth-assisted-token/resources/js/assisted-token.min.js"></script>
 <script>
@@ -122,20 +121,14 @@
 
     $(document).ready(function () {
 
-        $("button#getTokens").click(function (evt) {
+        $("button#getResource").click(function (evt) {
             evt.preventDefault();
-            console.log("Fetching tokens");
+            console.log("Fetching resource");
 
-            assistant.fetchTokens().then(function () {
-                //Tokens have been successfully retrieved
-                console.log("Tokens retrieved");
-                console.log("Token " + assistant.getAuthHeader());
-                $("#result_2").html("<div class='alert alert-success'>" + assistant.getAuthHeader() + "</div>");
-
-            }).fail(function (err) {
-                //Something didn't work during token retrieval
-                console.log("Failed to retrieve tokens", err);
-                $("#result_2").html("<div class='alert alert-danger'>" + err.error_description + "</div>");
+            $.get('/api').done(function (message) {
+                $("#result_2").html("<div class='alert alert-success'>" + message + "</div>");
+            }).fail(function (xhr) {
+                $("#result_2").html("<div class='alert alert-danger'>" + xhr.responseText + "</div>");
             });
 
         });
@@ -149,13 +142,11 @@
 
     $(document).ready(function () {
 
-        $("button#login").click(function (evt) {
+        $("button#getTokens").click(function (evt) {
             evt.preventDefault();
-            console.log("Logging in with forced authentication");
+            console.log("Fetching tokens");
 
-            assistant.login( {
-                force_auth: true
-            }).then(function () {
+            assistant.fetchTokens().then(function () {
                 //Tokens have been successfully retrieved
                 console.log("Tokens retrieved");
                 console.log("Token " + assistant.getAuthHeader());
@@ -178,14 +169,23 @@
 
     $(document).ready(function () {
 
-        $("button#getResource").click(function (evt) {
+        $("button#login").click(function (evt) {
             evt.preventDefault();
-            console.log("Fetching resource");
+            console.log("Logging in with forced authentication");
 
-            $.get('/api').done(function (message) {
-                $("#result_4").html("<div class='alert alert-success'>" + message + "</div>");
-            }).fail(function (xhr) {
-                $("#result_4").html("<div class='alert alert-danger'>" + xhr.responseText + "</div>");
+            assistant.login( {
+                force_auth: true,
+                scope: 'openid',
+            }).then(function () {
+                //Tokens have been successfully retrieved
+                console.log("Tokens retrieved");
+                console.log("Token " + assistant.getAuthHeader());
+                $("#result_4").html("<div class='alert alert-success'>" + assistant.getAuthHeader() + "</div>");
+
+            }).fail(function (err) {
+                //Something didn't work during token retrieval
+                console.log("Failed to retrieve tokens", err);
+                $("#result_4").html("<div class='alert alert-danger'>" + err.error_description + "</div>");
             });
 
         });
